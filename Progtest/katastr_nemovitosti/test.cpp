@@ -19,7 +19,7 @@ using namespace std;
 
 struct Land
 {
-  Land(string cityName, string addr, string reg, unsigned int id) : region(reg), id(id), city(cityName), address(addr), owner(""){};
+  Land(const string &cityName, const string &addr, const string &reg, const unsigned int id) : region(reg), id(id), city(cityName), address(addr), owner(""){};
   Land(string owner) : region(""), id(0), city(""), address(""), owner(owner){};
 
   string region;
@@ -27,6 +27,19 @@ struct Land
   string city;
   string address;
   string owner;
+};
+
+struct CompareByOwner
+{
+  bool operator()(const vector<Land> &first, const Land &second) { return CompareByOwner::toLow(first.begin()->owner) < CompareByOwner::toLow(second.owner); };
+
+  string toLow(const string &s)
+  {
+    string low = s;
+    for (char &c : low)
+      c = tolower(c);
+    return low;
+  };
 };
 
 class CIterator
@@ -61,17 +74,43 @@ public:
   {
     Land newLand = Land(city, addr, region, id);
 
-    if (find_if(sortedByRegion.begin(), sortedByRegion.end(), [newLand](const Land &land)
-                { return CLandRegister::findLand(land, newLand); }) != sortedByRegion.end())
+    auto itCity = lower_bound(sortedByCity.begin(), sortedByCity.end(), newLand, &CLandRegister::compareByCity);
+    auto itRegion = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), newLand, &CLandRegister::compareByRegion);
+
+    if (itCity == sortedByCity.end() && itRegion != sortedByRegion.end())
+    {
+      if (itRegion->region == region && itRegion->id == id)
+        return false;
+      sortedByCity.emplace_back(newLand);
+      sortedByRegion.insert(itRegion, newLand);
+    }
+    else if (itRegion == sortedByRegion.end() && itCity != sortedByCity.end())
+    {
+      if (itCity->city == city && itCity->address == addr)
+        return false;
+      sortedByRegion.emplace_back(newLand);
+      sortedByCity.insert(itCity, newLand);
+    }
+    else if (itCity == sortedByCity.end() && itRegion == sortedByRegion.end())
+    {
+      sortedByCity.emplace_back(newLand);
+      sortedByRegion.emplace_back(newLand);
+    }
+    else if (CLandRegister::findLand(*itCity, newLand) && CLandRegister::findLand(*itRegion, newLand))
       return false;
+    else if ((itCity->city == city && itCity->address == addr) || (itRegion->region == region && itRegion->id == id))
+      return false;
+    else
+    {
+      sortedByRegion.insert(itRegion, newLand);
+      sortedByCity.insert(itCity, newLand);
+    }
 
-    auto it = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), newLand, &CLandRegister::compareByRegion);
-    sortedByRegion.insert(it, newLand);
-
-    it = lower_bound(sortedByCity.begin(), sortedByCity.end(), newLand, &CLandRegister::compareByCity);
-    sortedByCity.insert(it, newLand);
-
-    sortedByOwner.insert(sortedByOwner.begin(), newLand);
+    auto ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), newLand, CompareByOwner());
+    if (!sortedByOwner.empty() && ownerIt->front().owner == "")
+      ownerIt->emplace_back(newLand);
+    else
+      sortedByOwner.insert(ownerIt, {newLand});
     return true;
   };
 
@@ -79,22 +118,28 @@ public:
            const std::string &addr)
   {
     Land findLand = Land(city, addr, "", 0);
-    auto it = find_if(sortedByCity.begin(), sortedByCity.end(), [findLand](const Land &land)
-                      { return CLandRegister::findLand(land, findLand); });
+    auto it = lower_bound(sortedByCity.begin(), sortedByCity.end(), findLand, &CLandRegister::compareByCity);
 
     if (it == sortedByCity.end())
       return false;
+    if (it->city != city || it->address != addr)
+      return false;
 
+    Land deleteLand = *it;
     sortedByCity.erase(it);
 
-    it = find_if(sortedByRegion.begin(), sortedByRegion.end(), [findLand](const Land &land)
-                 { return CLandRegister::findLand(land, findLand); });
+    it = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), deleteLand, &CLandRegister::compareByRegion);
     sortedByRegion.erase(it);
 
-    it = find_if(sortedByOwner.begin(), sortedByOwner.end(), [findLand](const Land &land)
-                 { return CLandRegister::findLand(land, findLand); });
-    sortedByOwner.erase(it);
-
+    auto ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), deleteLand, CompareByOwner());
+    for (auto land = ownerIt->begin();; land += 1)
+    {
+      if (CLandRegister::findLand(*land, deleteLand))
+      {
+        ownerIt->erase(land);
+        break;
+      }
+    }
     return true;
   };
 
@@ -102,21 +147,28 @@ public:
            unsigned int id)
   {
     Land findLand = Land("", "", region, id);
-    auto it = find_if(sortedByRegion.begin(), sortedByRegion.end(), [findLand](const Land &land)
-                      { return CLandRegister::findLand(land, findLand); });
+    auto it = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), findLand, &CLandRegister::compareByRegion);
 
     if (it == sortedByRegion.end())
       return false;
+    if (it->region != region || it->id != id)
+      return false;
 
+    Land deleteLand = *it;
     sortedByRegion.erase(it);
 
-    it = find_if(sortedByCity.begin(), sortedByCity.end(), [findLand](const Land &land)
-                 { return CLandRegister::findLand(land, findLand); });
+    it = lower_bound(sortedByCity.begin(), sortedByCity.end(), deleteLand, &CLandRegister::compareByRegion);
     sortedByCity.erase(it);
 
-    it = find_if(sortedByOwner.begin(), sortedByOwner.end(), [findLand](const Land &land)
-                 { return CLandRegister::findLand(land, findLand); });
-    sortedByOwner.erase(it);
+    auto ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), deleteLand, CompareByOwner());
+    for (auto land = ownerIt->begin();; land += 1)
+    {
+      if (CLandRegister::findLand(*land, deleteLand))
+      {
+        ownerIt->erase(land);
+        break;
+      }
+    }
 
     return true;
   };
@@ -126,14 +178,17 @@ public:
                 std::string &owner) const
   {
     Land findLand = Land(city, addr, "", 0);
-    auto it = find_if(sortedByCity.begin(), sortedByCity.end(), [findLand](const Land &land)
-                      { return CLandRegister::findLand(land, findLand); });
+    auto it = lower_bound(sortedByCity.begin(), sortedByCity.end(), findLand, &CLandRegister::compareByCity);
 
     if (it == sortedByCity.end())
       return false;
 
-    owner = it->owner;
-    return true;
+    if (it->city == city && it->address == addr)
+    {
+      owner = it->owner;
+      return true;
+    }
+    return false;
   };
 
   bool getOwner(const std::string &region,
@@ -141,14 +196,17 @@ public:
                 std::string &owner) const
   {
     Land findLand = Land("", "", region, id);
-    auto it = find_if(sortedByRegion.begin(), sortedByRegion.end(), [findLand](const Land &land)
-                      { return CLandRegister::findLand(land, findLand); });
+    auto it = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), findLand, &CLandRegister::compareByRegion);
 
     if (it == sortedByRegion.end())
       return false;
 
-    owner = it->owner;
-    return true;
+    if (it->region == region && it->id == id)
+    {
+      owner = it->owner;
+      return true;
+    }
+    return false;
   };
 
   bool newOwner(const std::string &city,
@@ -156,27 +214,34 @@ public:
                 const std::string &owner)
   {
     Land findLand = Land(city, addr, "", 0);
-    auto it = find_if(sortedByCity.begin(), sortedByCity.end(), [findLand](const Land &land)
-                      { return CLandRegister::findLand(land, findLand); });
+    auto it = lower_bound(sortedByCity.begin(), sortedByCity.end(), findLand, &CLandRegister::compareByCity);
 
-    if (it == sortedByCity.end() || it->owner == owner)
+    if (it == sortedByCity.end() || it->owner == owner || it->city != city || it->address != addr)
       return false;
 
     Land purchasedLand = *it;
     it->owner = owner;
 
-    it = find_if(sortedByRegion.begin(), sortedByRegion.end(), [purchasedLand](const Land &land)
-                 { return CLandRegister::findLand(land, purchasedLand); });
-    it->owner = owner;
-
-    it = find_if(sortedByOwner.begin(), sortedByOwner.end(), [purchasedLand](const Land &land)
-                 { return CLandRegister::findLand(land, purchasedLand); });
-    sortedByOwner.erase(it);
+    auto ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), purchasedLand, CompareByOwner());
+    for (auto land = ownerIt->begin();; land += 1)
+    {
+      if (land->city == city && land->address == addr)
+      {
+        ownerIt->erase(land);
+        break;
+      }
+    }
 
     purchasedLand.owner = owner;
 
-    it = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), purchasedLand, &CLandRegister::compareByOwner);
-    sortedByOwner.insert(it, purchasedLand);
+    ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), purchasedLand, CompareByOwner());
+    if (ownerIt != sortedByOwner.end() && toLow(ownerIt->front().owner) == toLow(owner))
+      ownerIt->emplace_back(purchasedLand);
+    else
+      sortedByOwner.insert(ownerIt, {purchasedLand});
+
+    it = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), purchasedLand, &CLandRegister::compareByRegion);
+    it->owner = owner;
 
     return true;
   };
@@ -186,27 +251,34 @@ public:
                 const std::string &owner)
   {
     Land findLand = Land("", "", region, id);
-    auto it = find_if(sortedByRegion.begin(), sortedByRegion.end(), [findLand](const Land &land)
-                      { return CLandRegister::findLand(land, findLand); });
+    auto it = lower_bound(sortedByRegion.begin(), sortedByRegion.end(), findLand, &CLandRegister::compareByRegion);
 
-    if (it == sortedByRegion.end() || it->owner == owner)
+    if (it == sortedByRegion.end() || it->owner == owner || it->region != region || it->id != id)
       return false;
 
     Land purchasedLand = *it;
     it->owner = owner;
 
-    it = find_if(sortedByCity.begin(), sortedByCity.end(), [purchasedLand](const Land &land)
-                 { return CLandRegister::findLand(land, purchasedLand); });
-    it->owner = owner;
-
-    it = find_if(sortedByOwner.begin(), sortedByOwner.end(), [purchasedLand](const Land &land)
-                 { return CLandRegister::findLand(land, purchasedLand); });
-    sortedByOwner.erase(it);
+    auto ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), purchasedLand, CompareByOwner());
+    for (auto land = ownerIt->begin();; land += 1)
+    {
+      if (land->region == region && land->id == id)
+      {
+        ownerIt->erase(land);
+        break;
+      }
+    }
 
     purchasedLand.owner = owner;
 
-    it = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), purchasedLand, &CLandRegister::compareByOwner);
-    sortedByOwner.insert(it, purchasedLand);
+    ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), purchasedLand, CompareByOwner());
+    if (ownerIt != sortedByOwner.end() && toLow(ownerIt->front().owner) == toLow(owner))
+      ownerIt->emplace_back(purchasedLand);
+    else
+      sortedByOwner.insert(ownerIt, {purchasedLand});
+
+    it = lower_bound(sortedByCity.begin(), sortedByCity.end(), purchasedLand, &CLandRegister::compareByCity);
+    it->owner = owner;
 
     return true;
   };
@@ -214,10 +286,11 @@ public:
   size_t count(const std::string &owner) const
   {
     Land land(owner);
-    auto it1 = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), land, &CLandRegister::compareByOwner);
-    auto it2 = upper_bound(sortedByOwner.begin(), sortedByOwner.end(), land, &CLandRegister::compareByOwner);
-    size_t count = distance(it1, it2);
-    return count;
+    auto ownerIt = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), land, CompareByOwner());
+    if (ownerIt == sortedByOwner.end())
+      return 0;
+    else
+      return ownerIt->size();
   };
 
   CIterator listByAddr() const { return CIterator(sortedByCity); };
@@ -225,11 +298,10 @@ public:
   CIterator listByOwner(const std::string &owner) const
   {
     Land land(owner);
-    auto it1 = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), land, &CLandRegister::compareByOwner);
-    auto it2 = upper_bound(sortedByOwner.begin(), sortedByOwner.end(), land, &CLandRegister::compareByOwner);
-    vector<Land> ownerLand(it1, it2);
-    reverse(ownerLand.begin(), ownerLand.end());
-    return CIterator(ownerLand);
+    auto it = lower_bound(sortedByOwner.begin(), sortedByOwner.end(), land, CompareByOwner());
+    if (it != sortedByOwner.end())
+      return *it;
+    return vector<Land>();
   };
 
 private:
@@ -255,8 +327,6 @@ private:
     return first.address < second.address;
   };
 
-  static bool compareByOwner(const Land &first, const Land &second) { return toLow(first.owner) < toLow(second.owner); }
-
   static bool findLand(const Land &land, const Land &targetLand)
   {
     return (land.region == targetLand.region && land.id == targetLand.id) || (land.city == targetLand.city && land.address == targetLand.address);
@@ -264,7 +334,7 @@ private:
 
   vector<Land> sortedByCity;
   vector<Land> sortedByRegion;
-  vector<Land> sortedByOwner;
+  vector<vector<Land>> sortedByOwner;
 };
 #ifndef __PROGTEST__
 static void test0()
