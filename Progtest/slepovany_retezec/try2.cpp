@@ -52,7 +52,7 @@ public:
     CPatchStr & remove(size_t from, size_t len);
     char * toStr() const;
 
-// private:
+private:
     size_t patchBinarySearch(size_t from) const;
     void resizeString(size_t secSize);
     void stringInsert(const CPatchStr & src, size_t posToInsert, bool increaseTotLen);
@@ -67,15 +67,6 @@ public:
     size_t capacity{};
     size_t totalLength = 0;
 };
-
-/*
-CPatchStr::CPatchStr() : size(0), capacity(1), totalLength(0)
-{
-    string = new Patch[capacity];
-    char * emptyStr = new char[1]{'\0'};
-    string[0].patch.reset(emptyStr);
-};
-*/
 
 CPatchStr::CPatchStr(const char * str) : size(1),
                                          capacity(1),
@@ -150,41 +141,24 @@ CPatchStr CPatchStr::subStr(size_t from, size_t len) const
     if (from + len > totalLength)
         throw out_of_range("Out of range");
 
-    //size_t lastSymbol = len;
-    //char * subString = new char[len + 1];
     CPatchStr subString;
-    /*if (len == 0)
-    {
-        subString[0] = '\0';
-        CPatchStr toReturn(subString);
-        delete [] subString;
-        return toReturn;
-    }*/
+    Patch toAdd;
+
     if (len == 0)
         return subString;
 
     size_t start = patchBinarySearch(from);
 
-    Patch toAdd;
     for (size_t i = start, shift = 0; len; i++)
     {
         if (string[i].patchLength == 0)
             continue;
-
-        /*cout << "patch:                   " << string[i].patch.get() << endl
-             << "offset:                  " << string[i].offset << endl
-             << "patchLength:             " << string[i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
 
         size_t copyLen;
         if (i == start)
         {
             copyLen = len < (string[i].strLengthIncludingPatch - from) ? len
                                                                        : string[i].strLengthIncludingPatch - from;
-            //memcpy(subString + shift,
-            //       string[i].patch.get() + string[i].offset + from - (string[i].strLengthIncludingPatch - string[i].patchLength),
-            //       copyLen);
             toAdd.offset = string[i].offset + from - (string[i].strLengthIncludingPatch - string[i].patchLength);
             toAdd.patchLength = copyLen;
             toAdd.patch = string[i].patch;
@@ -197,9 +171,6 @@ CPatchStr CPatchStr::subStr(size_t from, size_t len) const
         {
             copyLen = len < string[i].patchLength ? len
                                                   : string[i].patchLength;
-            //memcpy(subString + shift,
-            //       string[i].patch.get() + string[i].offset,
-            //       copyLen);
             toAdd.offset = string[i].offset;
             toAdd.patchLength = copyLen;
             toAdd.patch = string[i].patch;
@@ -209,10 +180,6 @@ CPatchStr CPatchStr::subStr(size_t from, size_t len) const
             len -= copyLen;
         }
     }
-    //subString[lastSymbol] = '\0';
-
-    //CPatchStr toReturn(subString);
-    //delete [] subString;
     return subString;
 }
 
@@ -267,15 +234,9 @@ CPatchStr &CPatchStr::remove(size_t from, size_t len)
     else
     {
         size_t posToRemove = patchBinarySearch(from);
-        // size_t startRemove = posToRemove;
         size_t fromInPatch = from - (string[posToRemove].strLengthIncludingPatch - string[posToRemove].patchLength);
         for (size_t i = posToRemove; len != 0; i++)
         {
-            /*cout << "patch:                   " << string[i].patch.get() << endl
-                 << "offset:                  " << string[i].offset << endl
-                 << "patchLength:             " << string[i].patchLength << endl
-                 << "strLengthIncludingPatch: " << string[i].strLengthIncludingPatch << endl
-                 << "----------------------------------------------------------" << endl;*/
            if ((string[i].offset == fromInPatch + string[i].offset) && string[i].patchLength <= len)
            {
                len -= string[i].patchLength;
@@ -283,14 +244,10 @@ CPatchStr &CPatchStr::remove(size_t from, size_t len)
                    fromInPatch = 0;
                this->removePatch(i);
                i--;
-               //cout << this->toStr() << endl;
            }
            else if ((string[i].offset < fromInPatch + string[i].offset) && (len < (string[i].patchLength - fromInPatch)))
            {
                size_t splitStringLen = string[i].patchLength - (fromInPatch + string[i].offset - string[i].offset) - len;
-               /*char * splitString = new char[splitStringLen + 1];
-               memcpy(splitString, string[i].patch.get() + fromInPatch + string[i].offset + len, splitStringLen);
-               splitString[splitStringLen] = '\0';*/
 
                Patch splitString;
                splitString.offset = fromInPatch + string[i].offset + len;
@@ -352,12 +309,6 @@ size_t CPatchStr::patchBinarySearch(const size_t from) const
         pos = upper - (upper - lower) / 2,
         intFrom = from;
 
-    /*cout << "patch:                   " << string[pos].patch.get() << endl
-         << "offset:                  " << string[pos].offset << endl
-         << "patchLength:             " << string[pos].patchLength << endl
-         << "strLengthIncludingPatch: " << string[pos].strLengthIncludingPatch << endl
-         << "----------------------------------------------------------" << endl;*/
-
     while (! (((int)string[pos].strLengthIncludingPatch - (int)string[pos].patchLength <= intFrom)
                && (intFrom + 1 <= (int)string[pos].strLengthIncludingPatch)))
     {
@@ -366,12 +317,6 @@ size_t CPatchStr::patchBinarySearch(const size_t from) const
         else
             lower = pos + 1;
         pos = upper - (upper - lower) / 2;
-
-        /*cout << "patch:                   " << string[pos].patch.get() << endl
-             << "offset:                  " << string[pos].offset << endl
-             << "patchLength:             " << string[pos].patchLength << endl
-             << "strLengthIncludingPatch: " << string[pos].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
     }
     return pos;
 }
@@ -381,39 +326,15 @@ void CPatchStr::stringInsert(const CPatchStr &src, size_t posToInsert, bool incr
     int pos = posToInsert;
     for (int i = size - 1; i >= pos; i--)
     {
-        /*cout << "patch:                   " << string[i].patch.get() << endl
-             << "offset:                  " << string[i].offset << endl
-             << "patchLength:             " << string[i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
-
         string[i + src.size] = string[i];
         string[i + src.size].strLengthIncludingPatch += src.totalLength;
-
-        /*cout << "patch:                   " << string[i].patch.get() << endl
-             << "offset:                  " << string[i].offset << endl
-             << "patchLength:             " << string[i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
     }
     for (size_t i = 0; i < src.size; i++)
     {
-        /*cout << "patch:                   " << string[posToInsert + i].patch.get() << endl
-             << "offset:                  " << string[posToInsert + i].offset << endl
-             << "patchLength:             " << string[posToInsert + i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[posToInsert + i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
-
         string[posToInsert + i] = src.string[i];
         posToInsert + i ? string[posToInsert + i].strLengthIncludingPatch = string[posToInsert + i - 1].strLengthIncludingPatch
                                                                             + string[posToInsert + i].patchLength
                         : string[posToInsert + i].strLengthIncludingPatch = string[posToInsert + i].patchLength;
-
-        /*cout << "patch:                   " << string[posToInsert + i].patch.get() << endl
-             << "offset:                  " << string[posToInsert + i].offset << endl
-             << "patchLength:             " << string[posToInsert + i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[posToInsert + i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
     }
     size += src.size;
     if (increaseTotLen)
@@ -453,15 +374,6 @@ CPatchStr &CPatchStr::normalInsert(size_t pos, const CPatchStr &src)
         this->stringInsert(src, posToInsert, true);
     else
     {
-        /*char * splitString = new char[string[posToInsert].strLengthIncludingPatch - pos + 1];
-        memcpy(splitString,
-               string[posToInsert].patch.get()
-               + string[posToInsert].offset
-               + (pos - (string[posToInsert].strLengthIncludingPatch - string[posToInsert].patchLength)),
-               string[posToInsert].strLengthIncludingPatch - pos);
-
-        splitString[string[posToInsert].strLengthIncludingPatch - pos] = '\0';*/
-
         Patch splitString;
         splitString.offset = string[posToInsert].offset + (pos - (string[posToInsert].strLengthIncludingPatch - string[posToInsert].patchLength));
         splitString.patchLength = string[posToInsert].strLengthIncludingPatch - pos;
@@ -483,20 +395,8 @@ void CPatchStr::insertPatch(const Patch &src, size_t posToInsert)
 {
     int pos = posToInsert;
     for (int i = size - 1; i >= pos; i--)
-    {
-        /*cout << "patch:                   " << string[i].patch.get() << endl
-             << "offset:                  " << string[i].offset << endl
-             << "patchLength:             " << string[i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
-
         string[i + 1] = string[i];
-        /*cout << "patch:                   " << string[i].patch.get() << endl
-             << "offset:                  " << string[i].offset << endl
-             << "patchLength:             " << string[i].patchLength << endl
-             << "strLengthIncludingPatch: " << string[i].strLengthIncludingPatch << endl
-             << "----------------------------------------------------------" << endl;*/
-    }
+
     string[posToInsert] = src;
     posToInsert ? string[posToInsert].strLengthIncludingPatch = string[posToInsert - 1].strLengthIncludingPatch
                                                               + string[posToInsert].patchLength
