@@ -416,18 +416,13 @@ std::list<CStudent> CStudyDept::search(const CFilter & flt, const CSort & sortOp
 std::set<std::string> CStudyDept::suggest(const string & name) const
 {
     set<string> names;
-    set<string> currentName;
     set<string> subName;
 
     nameToSet(subName, name);
 
     for (auto & student : sortedStudentsByEnroll)
-    {
-        nameToSet(currentName, student.m_StringName);
-        if (includes(currentName.begin(), currentName.end(), subName.begin(), subName.end()))
+        if (includes(student.m_Name.begin(), student.m_Name.end(), subName.begin(), subName.end()))
             names.insert(student.m_StringName);
-        currentName.clear();
-    }
 
     return names;
 }
