@@ -139,7 +139,7 @@ bool CStudent::operator!=(const CStudent & other) const { return !(*this == othe
 class CFilter
 {
 public:
-    CFilter();
+    CFilter() = default;
 
     CFilter & name(const std::string & name);
     CFilter & bornBefore(const CDate & date);
@@ -151,14 +151,12 @@ public:
     bool validCheck() const;
 
     bool m_Valid = true;
-    int m_EnrolledBefore;
-    int m_EnrolledAfter;
+    int m_EnrolledBefore = INT_MAX;
+    int m_EnrolledAfter = -1;
     CDate m_BornBefore = CDate(INT_MAX, INT_MAX, INT_MAX);
     CDate m_BornAfter = CDate(-1, -1, -1);
     vector<multiset<string>> m_Names;
 };
-//---------------------------------------------------------------------------
-CFilter::CFilter() : m_EnrolledBefore(INT_MAX), m_EnrolledAfter(-1) {}
 //---------------------------------------------------------------------------
 CFilter & CFilter::name(const string & name)
 {
