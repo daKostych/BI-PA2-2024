@@ -50,6 +50,7 @@ enum class ESortKey
 
 using namespace std;
 
+//---------------------------------------------------------------------------
 string toLow(const string & s)
 {
     string low = s;
@@ -57,7 +58,7 @@ string toLow(const string & s)
         c = tolower(c);
     return low;
 }
-
+//---------------------------------------------------------------------------
 void nameToSet(set<string> & s, const string & name)
 {
     istringstream iName(name);
@@ -65,7 +66,7 @@ void nameToSet(set<string> & s, const string & name)
     while (iName >> namePart)
         s.insert(toLow(namePart));
 }
-
+//---------------------------------------------------------------------------
 multiset<string> nameToMultiset(const string & name)
 {
     istringstream iName(toLow(name));
@@ -77,7 +78,6 @@ multiset<string> nameToMultiset(const string & name)
 
     return nameParts;
 }
-
 //----------------------------------------------------------------------------------------------------------------------
 class CStudent
 {
@@ -92,37 +92,30 @@ public:
     bool operator==(const CStudent & other) const;
     bool operator!=(const CStudent & other) const;
 
-//private:
     multiset<string> m_Name;
     string m_StringName;
     CDate m_BirthDate = CDate(-1, -1, -1);
     int m_EnrollYear = -1;
     int m_HistoryId = -1;
 };
-
 //---------------------------------------------------------------------------
 CStudent::CStudent(const string & name, const CDate & born, int enrolled) : m_BirthDate(born), m_EnrollYear(enrolled)
 {
     m_Name = nameToMultiset(name);
     m_StringName = name;
 }
-
 //---------------------------------------------------------------------------
 CStudent::CStudent(const multiset<string> & name) : m_Name(name) {}
-
 //---------------------------------------------------------------------------
 CStudent::CStudent(const CDate & born) : m_BirthDate(born) {}
-
 //---------------------------------------------------------------------------
 CStudent::CStudent(int enrolled) : m_EnrollYear(enrolled) {}
-
 //---------------------------------------------------------------------------
 CStudent::CStudent(const CStudent & s, int id) : m_Name(s.m_Name),
                                                  m_StringName(s.m_StringName),
                                                  m_BirthDate(s.m_BirthDate),
                                                  m_EnrollYear(s.m_EnrollYear),
                                                  m_HistoryId(id) {}
-
 //---------------------------------------------------------------------------
 bool CStudent::operator<(const CStudent & other) const
 {
@@ -131,7 +124,6 @@ bool CStudent::operator<(const CStudent & other) const
     else
         return m_HistoryId < other.m_HistoryId;
 }
-
 //---------------------------------------------------------------------------
 bool CStudent::operator==(const CStudent & other) const
 {
@@ -141,9 +133,8 @@ bool CStudent::operator==(const CStudent & other) const
         return true;
     return false;
 }
-
+//---------------------------------------------------------------------------
 bool CStudent::operator!=(const CStudent & other) const { return !(*this == other); }
-
 //----------------------------------------------------------------------------------------------------------------------
 class CFilter
 {
@@ -159,7 +150,6 @@ public:
     bool birthMatch(const CDate & date) const;
     bool validCheck() const;
 
-//private:
     bool m_Valid = true;
     int m_EnrolledBefore;
     int m_EnrolledAfter;
@@ -167,10 +157,8 @@ public:
     CDate m_BornAfter = CDate(-1, -1, -1);
     vector<multiset<string>> m_Names;
 };
-
 //---------------------------------------------------------------------------
 CFilter::CFilter() : m_EnrolledBefore(INT_MAX), m_EnrolledAfter(-1) {}
-
 //---------------------------------------------------------------------------
 CFilter & CFilter::name(const string & name)
 {
@@ -178,7 +166,6 @@ CFilter & CFilter::name(const string & name)
     m_Names.push_back(n);
     return *this;
 }
-
 //---------------------------------------------------------------------------
 CFilter & CFilter::bornBefore(const CDate & date)
 {
@@ -186,7 +173,6 @@ CFilter & CFilter::bornBefore(const CDate & date)
     m_Valid = validCheck();
     return *this;
 }
-
 //---------------------------------------------------------------------------
 CFilter & CFilter::bornAfter(const CDate & date)
 {
@@ -194,7 +180,6 @@ CFilter & CFilter::bornAfter(const CDate & date)
     m_Valid = validCheck();
     return *this;
 }
-
 //---------------------------------------------------------------------------
 CFilter & CFilter::enrolledBefore(int year)
 {
@@ -202,7 +187,6 @@ CFilter & CFilter::enrolledBefore(int year)
     m_Valid = validCheck();
     return *this;
 }
-
 //---------------------------------------------------------------------------
 CFilter & CFilter::enrolledAfter(int year)
 {
@@ -210,7 +194,6 @@ CFilter & CFilter::enrolledAfter(int year)
     m_Valid = validCheck();
     return *this;
 }
-
 //---------------------------------------------------------------------------
 bool CFilter::validCheck() const
 {
@@ -222,7 +205,6 @@ bool CFilter::validCheck() const
         return false;
     return true;
 }
-
 //---------------------------------------------------------------------------
 bool CFilter::nameMatch(const multiset<string> & studentName) const
 {
@@ -235,10 +217,9 @@ bool CFilter::nameMatch(const multiset<string> & studentName) const
             if (name == studentName)
                 suitName = true;
     }
-
     return suitName;
 }
-
+//---------------------------------------------------------------------------
 bool CFilter::birthMatch(const CDate & date) const
 {
     if (date >= m_BornBefore ||
@@ -247,26 +228,21 @@ bool CFilter::birthMatch(const CDate & date) const
 
     return true;
 }
-
 //----------------------------------------------------------------------------------------------------------------------
 class CSort
 {
 public:
     CSort() = default;
-
     CSort & addKey(ESortKey key, bool ascending);
 
-//private:
     vector<pair<ESortKey, bool>> sortKeys;
 };
-
 //---------------------------------------------------------------------------
 CSort & CSort::addKey(ESortKey key, bool ascending)
 {
     sortKeys.emplace_back(key, ascending);
     return *this;
 }
-
 //----------------------------------------------------------------------------------------------------------------------
 class CStudyDept
 {
@@ -300,7 +276,6 @@ private:
     set<CStudent, compareByDate> sortedStudentsByBirthDate;
     int historyStudentsCount = 0;
 };
-
 //---------------------------------------------------------------------------
 bool CStudyDept::addStudent(const CStudent & x)
 {
@@ -314,7 +289,6 @@ bool CStudyDept::addStudent(const CStudent & x)
     historyStudentsCount++;
     return true;
 }
-
 //---------------------------------------------------------------------------
 bool CStudyDept::delStudent(const CStudent & x)
 {
@@ -324,10 +298,8 @@ bool CStudyDept::delStudent(const CStudent & x)
 
     sortedStudentsByEnroll.erase(x);
     sortedStudentsByBirthDate.erase(x);
-
     return true;
 }
-
 //---------------------------------------------------------------------------
 std::list<CStudent> CStudyDept::search(const CFilter & flt, const CSort & sortOpt) const
 {
@@ -381,8 +353,6 @@ std::list<CStudent> CStudyDept::search(const CFilter & flt, const CSort & sortOp
         for (auto i = shiftEnroll1; i != shiftEnroll2; i++)
             if (flt.birthMatch(i->m_BirthDate) && flt.nameMatch(i->m_Name))
                 sortedStudents.push_back(*i);
-
-        sortedStudents.sort(compare);
     }
     else if ((flt.m_BornAfter >= minDate) ||
             (flt.m_BornBefore <= maxDate))
@@ -397,21 +367,17 @@ std::list<CStudent> CStudyDept::search(const CFilter & flt, const CSort & sortOp
         for (auto i = shiftDate1; i != shiftDate2; i++)
             if (flt.nameMatch(i->m_Name) && flt.birthMatch(i->m_BirthDate))
                 sortedStudents.push_back(*i);
-
-        sortedStudents.sort(compare);
     }
     else
     {
         for (const auto & student : sortedStudentsByEnroll)
             if (flt.nameMatch(student.m_Name))
                 sortedStudents.push_back(student);
-
-        sortedStudents.sort(compare);
     }
 
+    sortedStudents.sort(compare);
     return sortedStudents;
 }
-
 //---------------------------------------------------------------------------
 std::set<std::string> CStudyDept::suggest(const string & name) const
 {
@@ -421,13 +387,12 @@ std::set<std::string> CStudyDept::suggest(const string & name) const
     nameToSet(subName, name);
 
     for (auto & student : sortedStudentsByEnroll)
-        if (includes(student.m_Name.begin(), student.m_Name.end(), subName.begin(), subName.end()))
+        if (includes(student.m_Name.begin(), student.m_Name.end(),
+                     subName.begin(), subName.end()))
             names.insert(student.m_StringName);
 
     return names;
 }
-
-
 //---------------------------------------------------------------------------
 bool CStudyDept::compareStudentsByBirthDate(const CStudent & s1, const CStudent & s2)
 {
@@ -442,7 +407,6 @@ bool CStudyDept::compareStudentsByBirthDate(const CStudent & s1, const CStudent 
     else
         return false;
 }
-
 //---------------------------------------------------------------------------
 bool CStudyDept::compareStudentsByEnroll(const CStudent & s1, const CStudent & s2)
 {
@@ -457,7 +421,7 @@ bool CStudyDept::compareStudentsByEnroll(const CStudent & s1, const CStudent & s
     else
         return false;
 }
-
+//---------------------------------------------------------------------------
 #ifndef __PROGTEST__
 
 int main(void)
