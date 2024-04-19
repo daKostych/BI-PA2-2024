@@ -28,5 +28,5 @@ public:
     stack<ANode> builderStack;
 
 private:
-    // static string removeDollars(const string & str);
+    static string removeDollars(const string & str);
 };
