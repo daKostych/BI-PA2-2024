@@ -1,3 +1,5 @@
+#pragma once
+
 #include "expression.h"
 #include "node.h"
 #include <stack>

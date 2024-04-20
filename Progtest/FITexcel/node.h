@@ -1,3 +1,5 @@
+#pragma once
+
 #include "position.h"
 #include <variant>
 #include <memory>

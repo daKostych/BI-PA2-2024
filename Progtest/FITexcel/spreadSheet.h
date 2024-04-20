@@ -1,3 +1,5 @@
+#pragma once
+
 #include "builder.h"
 #include <variant>
 #include <memory>
