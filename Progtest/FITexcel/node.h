@@ -3,25 +3,26 @@
 #include "position.h"
 #include <variant>
 #include <memory>
+#include <map>
 
 using CValue = std::variant<std::monostate, double, std::string>;
+class Node;
+using ANode = unique_ptr<Node>;
 
 //======================================================================================================================
 class Node
 {
 public:
     virtual ~Node() = default;
-    virtual CValue evaluateNode() const = 0;
+    virtual CValue evaluateNode(map<CPos, ANode> & table) const = 0;
     virtual Node * cloneNode() const = 0;
 };
-
-using ANode = unique_ptr<Node>;
 //======================================================================================================================
 class Operand : public Node
 {
 public:
     Operand(CValue newValue) : _val(std::move(newValue)) {};
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -34,7 +35,7 @@ public:
     RefOperand(CPos reference, bool rowAb, bool columnAb) : _referencedPosition(reference),
                                                             _rowAbsolute(rowAb),
                                                             _columnAbsolute(columnAb) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -47,7 +48,7 @@ class OperatorAdd : public Node
 {
 public:
     OperatorAdd(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -58,7 +59,7 @@ class OperatorSub : public Node
 {
 public:
     OperatorSub(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -69,7 +70,7 @@ class OperatorMul : public Node
 {
 public:
     OperatorMul(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -80,7 +81,7 @@ class OperatorDiv : public Node
 {
 public:
     OperatorDiv(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -91,7 +92,7 @@ class OperatorPow : public Node
 {
 public:
     OperatorPow(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -102,7 +103,7 @@ class OperatorNeg : public Node
 {
 public:
     OperatorNeg(ANode node) : _node(std::move(node)) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
 private:
@@ -115,13 +116,12 @@ public:
     OperatorComp(ANode l, ANode r, const std::string sign) : _lhs(std::move(l)),
                                                              _rhs(std::move(r)),
                                                              _sign(sign) {}
-    CValue evaluateNode() const override;
+    CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode() const override;
 
-    friend bool operator<(ANode lhs, ANode rhs);
-    friend bool operator==(ANode lhs, ANode rhs);
-
 private:
+    void compare(const CValue & lhs, const CValue & rhs, CValue & result) const;
+
     ANode _lhs, _rhs;
     std::string _sign;
 };
