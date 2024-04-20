@@ -14,14 +14,16 @@ CPos::CPos(string_view str)
         throw invalid_argument("Invalid position.");
 
     size_t columnEnd = index.find_first_of("1234567890");
+    unsigned calculateColumn = 0;
     for (size_t i = 0; i < columnEnd; i++)
     {
         char symbol = (char)toupper(index[i]);
         if (symbol < 'A' || symbol > 'Z')
             throw invalid_argument("Invalid position.");
-        _column *= 26;
-        _column += symbol - 'A' + 1;
+        calculateColumn *= 26;
+        calculateColumn += symbol - 'A' + 1;
     }
+    _column = calculateColumn;
     _row = stoi(index.substr(columnEnd));
 }
 //======================================================================================================================
