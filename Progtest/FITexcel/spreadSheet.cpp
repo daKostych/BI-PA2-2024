@@ -53,7 +53,7 @@ CValue CSpreadsheet::getValue(CPos pos)
     auto iterator = _table.find(pos);
     if (iterator == _table.end())
         return std::monostate();
-    return _table[pos]->evaluateNode();
+    return _table[pos]->evaluateNode(_table);
 }
 //======================================================================================================================
 //void copyRect(CPos dst, CPos src, int w = 1, int h = 1) {} // todo
