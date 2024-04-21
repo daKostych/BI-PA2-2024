@@ -27,6 +27,15 @@ CPos::CPos(string_view str)
     _row = stoi(index.substr(columnEnd));
 }
 //======================================================================================================================
+string CPos::columnToString() const
+{
+    string result;
+    int column = static_cast<int>(_column);
+    for (; column > 0; column = (column - 1) / 26)
+        result.insert(result.begin(), (char)((column - 1) % 26 + 'A'));
+    return result;
+}
+//======================================================================================================================
 bool operator<(const CPos & lhs, const CPos & rhs)
 {
     if (lhs._column != rhs._column)
