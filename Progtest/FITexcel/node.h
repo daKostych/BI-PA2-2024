@@ -16,6 +16,7 @@ public:
     virtual ~Node() = default;
     virtual CValue evaluateNode(map<CPos, ANode> & table) const = 0;
     virtual Node * cloneNode(int columnShift, int rowShift) const = 0;
+    virtual void printTree(ostream & os) const = 0;
 };
 //======================================================================================================================
 class Operand : public Node
@@ -24,6 +25,7 @@ public:
     Operand(CValue newValue) : _val(std::move(newValue)) {};
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     CValue _val;
@@ -37,6 +39,7 @@ public:
                                                             _columnAbsolute(columnAb) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     CPos _referencedPosition;
@@ -50,6 +53,7 @@ public:
     OperatorAdd(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     ANode _lhs, _rhs;
@@ -61,6 +65,7 @@ public:
     OperatorSub(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     ANode _lhs, _rhs;
@@ -72,6 +77,7 @@ public:
     OperatorMul(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     ANode _lhs, _rhs;
@@ -83,6 +89,7 @@ public:
     OperatorDiv(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     ANode _lhs, _rhs;
@@ -94,6 +101,7 @@ public:
     OperatorPow(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     ANode _lhs, _rhs;
@@ -105,6 +113,7 @@ public:
     OperatorNeg(ANode node) : _node(std::move(node)) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     ANode _node;
@@ -118,6 +127,7 @@ public:
                                                              _sign(sign) {}
     CValue evaluateNode(map<CPos, ANode> & table) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
+    void printTree(ostream & os) const override;
 
 private:
     void compare(const CValue & lhs, const CValue & rhs, CValue & result) const;

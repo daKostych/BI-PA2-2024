@@ -12,6 +12,83 @@ template<class... Ts> overload(Ts...) -> overload<Ts...>;
 using CValue = std::variant<std::monostate, double, std::string>;
 using ANode = unique_ptr<Node>;
 //======================================================================================================================
+void Operand::printTree(ostream & os) const
+{
+    visit(overload
+    {
+        [&os](double val) { os << val; },
+        [&os](const string & val) { os << val; },
+        [](const auto & val) {}
+    }, _val);
+}
+//======================================================================================================================
+void RefOperand::printTree(ostream & os) const
+{
+    if (_columnAbsolute)
+        os << '$';
+    os << _referencedPosition.columnToString();
+    if (_rowAbsolute)
+        os << '$';
+    os << _referencedPosition._row;
+}
+//======================================================================================================================
+void OperatorAdd::printTree(ostream & os) const
+{
+    os << '(';
+    _lhs->printTree(os);
+    os << '+';
+    _rhs->printTree(os);
+    os << ')';
+}
+//======================================================================================================================
+void OperatorSub::printTree(ostream & os) const
+{
+    os << '(';
+    _lhs->printTree(os);
+    os << '-';
+    _rhs->printTree(os);
+    os << ')';
+}
+//======================================================================================================================
+void OperatorMul::printTree(ostream & os) const
+{
+    _lhs->printTree(os);
+    os << '*';
+    _rhs->printTree(os);
+}
+//======================================================================================================================
+void OperatorDiv::printTree(ostream & os) const
+{
+    _lhs->printTree(os);
+    os << '/';
+    _rhs->printTree(os);
+}
+//======================================================================================================================
+void OperatorPow::printTree(ostream & os) const
+{
+    os << '(';
+    _lhs->printTree(os);
+    os << '^';
+    _rhs->printTree(os);
+    os << ')';
+}
+//======================================================================================================================
+void OperatorNeg::printTree(ostream & os) const
+{
+    os << '(' << '-';
+    _node->printTree(os);
+    os << ')';
+}
+//======================================================================================================================
+void OperatorComp::printTree(ostream & os) const
+{
+    os << '(';
+    _lhs->printTree(os);
+    os << _sign;
+    _rhs->printTree(os);
+    os << ')';
+}
+//======================================================================================================================
 CValue Operand::evaluateNode(map<CPos, ANode> & table) const { return _val; }
 //======================================================================================================================
 CValue RefOperand::evaluateNode(map<CPos, ANode> & table) const
