@@ -29,8 +29,14 @@ CPos::CPos(string_view str)
 //======================================================================================================================
 bool operator<(const CPos & lhs, const CPos & rhs)
 {
-    if (lhs._row != rhs._row)
-        return lhs._row < rhs._row;
-    return lhs._column < rhs._column;
+    if (lhs._column != rhs._column)
+        return lhs._column < rhs._column;
+    return lhs._row < rhs._row;
+}
+//======================================================================================================================
+bool operator==(const CPos & lhs, const CPos & rhs)
+{
+    return lhs._row == rhs._row &&
+           lhs._column == rhs._column;
 }
 //======================================================================================================================
