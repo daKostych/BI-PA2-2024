@@ -16,6 +16,9 @@ CValue Operand::evaluateNode(map<CPos, ANode> & table) const { return _val; }
 //======================================================================================================================
 CValue RefOperand::evaluateNode(map<CPos, ANode> & table) const
 {
+    auto iterator = table.find(_referencedPosition);
+    if (iterator == table.end())
+        return monostate();
     return table[_referencedPosition]->evaluateNode(table);
 }
 //======================================================================================================================
@@ -128,45 +131,62 @@ CValue OperatorComp::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-Node * Operand::cloneNode() const { return new Operand(_val); }
+Node * Operand::cloneNode(int columnShift, int rowShift) const { return new Operand(_val); }
 //======================================================================================================================
-Node * RefOperand::cloneNode() const { return new RefOperand(_referencedPosition,
-                                                             _rowAbsolute,
-                                                             _columnAbsolute); }
-//======================================================================================================================
-Node * OperatorAdd::cloneNode() const
+Node * RefOperand::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorAdd(ANode(_lhs->cloneNode()), ANode(_rhs->cloneNode()));
+    unsigned newRow = _referencedPosition._row,
+             newColumn = _referencedPosition._column;
+    if (!_rowAbsolute)
+        newRow += rowShift;
+    if (!_columnAbsolute)
+        newColumn += columnShift;
+
+    return new RefOperand(CPos(newColumn, newRow),
+                          _rowAbsolute,
+                          _columnAbsolute);
 }
 //======================================================================================================================
-Node * OperatorSub::cloneNode() const
+Node * OperatorAdd::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorSub(ANode(_lhs->cloneNode()), ANode(_rhs->cloneNode()));
+    return new OperatorAdd(ANode(_lhs->cloneNode(columnShift, rowShift)),
+                           ANode(_rhs->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
-Node * OperatorMul::cloneNode() const
+Node * OperatorSub::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorMul(ANode(_lhs->cloneNode()), ANode(_rhs->cloneNode()));
+    return new OperatorSub(ANode(_lhs->cloneNode(columnShift, rowShift)),
+                           ANode(_rhs->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
-Node * OperatorDiv::cloneNode() const
+Node * OperatorMul::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorDiv(ANode(_lhs->cloneNode()), ANode(_rhs->cloneNode()));
+    return new OperatorMul(ANode(_lhs->cloneNode(columnShift, rowShift)),
+                           ANode(_rhs->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
-Node * OperatorPow::cloneNode() const
+Node * OperatorDiv::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorPow(ANode(_lhs->cloneNode()), ANode(_rhs->cloneNode()));
+    return new OperatorDiv(ANode(_lhs->cloneNode(columnShift, rowShift)),
+                           ANode(_rhs->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
-Node * OperatorNeg::cloneNode() const
+Node * OperatorPow::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorNeg(ANode(_node->cloneNode()));
+    return new OperatorPow(ANode(_lhs->cloneNode(columnShift, rowShift)),
+                           ANode(_rhs->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
-Node * OperatorComp::cloneNode() const
+Node * OperatorNeg::cloneNode(int columnShift, int rowShift) const
 {
-    return new OperatorComp(ANode(_lhs->cloneNode()), ANode(_rhs->cloneNode()), _sign);
+    return new OperatorNeg(ANode(_node->cloneNode(columnShift, rowShift)));
+}
+//======================================================================================================================
+Node * OperatorComp::cloneNode(int columnShift, int rowShift) const
+{
+    return new OperatorComp(ANode(_lhs->cloneNode(columnShift, rowShift)),
+                            ANode(_rhs->cloneNode(columnShift, rowShift)),
+                            _sign);
 }
 //======================================================================================================================
 void OperatorComp::compare(const CValue & lhs, const CValue & rhs, CValue & result) const
