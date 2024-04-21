@@ -17,7 +17,18 @@ void Operand::printTree(ostream & os) const
     visit(overload
     {
         [&os](double val) { os << val; },
-        [&os](const string & val) { os << val; },
+        [&os](const string & val)
+        {
+            os << "\"";
+            for (char c : val)
+            {
+                if (c == '"')
+                    os << "\"\"";
+                else
+                    os << c;
+            }
+            os << "\"";
+        },
         [](const auto & val) {}
     }, _val);
 }
@@ -96,7 +107,7 @@ CValue RefOperand::evaluateNode(map<CPos, ANode> & table) const
     auto iterator = table.find(_referencedPosition);
     if (iterator == table.end())
         return monostate();
-    return table[_referencedPosition]->evaluateNode(table);
+    return iterator->second->evaluateNode(table);
 }
 //======================================================================================================================
 CValue OperatorAdd::evaluateNode(map<CPos, ANode> & table) const
@@ -278,7 +289,7 @@ void OperatorComp::compare(const CValue & lhs, const CValue & rhs, CValue & resu
         result = (double)(lhs >= rhs);
     else if (_sign == "==")
         result = (double)(lhs == rhs);
-    else if (_sign == "!=")
+    else if (_sign == "<>")
         result = (double)(lhs != rhs);
     else
         result = monostate();
