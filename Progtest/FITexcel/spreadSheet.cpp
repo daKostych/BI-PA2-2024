@@ -1,12 +1,13 @@
 #include "spreadSheet.h"
 #include <iostream>
+#include <cmath>
 
 //======================================================================================================================
 CSpreadsheet::CSpreadsheet(const CSpreadsheet & other)
 {
     _table.clear();
     for (const auto & element : other._table)
-        _table.emplace(element.first, element.second->cloneNode());
+        _table.emplace(element.first, element.second->cloneNode(0, 0));
     _stringTable.clear();
     for (const auto & element : other._stringTable)
         _stringTable[element.first] = element.second;
@@ -98,10 +99,6 @@ bool CSpreadsheet::save(std::ostream & os) const
         fullTable += "c" + to_string(element.first._column) +
                      "r" + to_string(element.first._row) +
                      "_" + element.second + '|';
-    if (!fullTable.empty())
-        fullTable.erase(fullTable.size() - 1);
-    else
-        return false;
 
     os << fullTable;
     return true;
@@ -131,5 +128,37 @@ CValue CSpreadsheet::getValue(CPos pos)
     return _table[pos]->evaluateNode(_table);
 }
 //======================================================================================================================
-//void copyRect(CPos dst, CPos src, int w = 1, int h = 1) {} // todo
+void CSpreadsheet::copyRect(CPos dst, CPos src, int w, int h)
+{
+    if (w < 1 || h < 1 || dst == src)
+        return;
+
+    map<CPos, ANode> tmpTable;
+    map<CPos, string> tmpStringTable;
+    int columnShift = static_cast<int>(max(dst._column, src._column) - min(dst._column, src._column));
+    if (max(dst._column, src._column) == src._column)
+        columnShift = -columnShift;
+    int rowShift = static_cast<int>(max(dst._row, src._row) - min(dst._row, src._row));
+    if (max(dst._row, src._row) == src._row)
+        rowShift = -rowShift;
+
+    for (size_t column = src._column; column < src._column + w; column++)
+    {
+        for (size_t row = src._row; row < src._row + h; row++)
+        {
+            auto iterator = _table.find(CPos(column, row));
+            if (iterator != _table.end())
+                tmpTable.emplace(CPos(column + columnShift, row + rowShift),
+                                 _table[CPos(column, row)]->cloneNode(columnShift, rowShift));
+            else
+                tmpTable.emplace(CPos(column + columnShift, row + rowShift),
+                                 new Operand(monostate()));
+            // need to add copy of the stringTable
+        }
+    }
+
+    for (auto & element : tmpTable)
+        _table[element.first] = std::move(element.second);
+    // need to add moving elements from tmpStringTable to stringTable
+}
 //======================================================================================================================

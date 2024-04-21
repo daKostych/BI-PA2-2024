@@ -32,7 +32,7 @@ public:
     bool save(std::ostream & os) const;
     bool setCell(CPos pos, std::string contents);
     CValue getValue(CPos pos);
-    //void copyRect(CPos dst, CPos src, int w = 1, int h = 1);
+    void copyRect(CPos dst, CPos src, int w = 1, int h = 1);
 
 private:
     map<CPos, ANode> _table;
