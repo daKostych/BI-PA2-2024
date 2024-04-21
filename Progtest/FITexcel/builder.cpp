@@ -72,7 +72,7 @@ void Builder::opNe()
     builderStack.pop();
     ANode lhs = std::move(builderStack.top());
     builderStack.pop();
-    builderStack.emplace(new OperatorComp(std::move(lhs), std::move(rhs), "!="));
+    builderStack.emplace(new OperatorComp(std::move(lhs), std::move(rhs), "<>"));
 }
 //======================================================================================================================
 void Builder::opLt()
@@ -128,9 +128,9 @@ void Builder::valReference(std::string val)
         builderStack.emplace(new RefOperand(CPos(val), rowAb, columnAb));
 }
 //======================================================================================================================
-//void valRange(std::string val) {} // todo
+void Builder::valRange(std::string val) { } // todo
 //======================================================================================================================
-//void funcCall(std::string fnName, int paramCount) {} // todo
+void Builder::funcCall(std::string fnName, int paramCount) { } // todo
 //======================================================================================================================
 string Builder::removeDollars(const string & str)
 {
