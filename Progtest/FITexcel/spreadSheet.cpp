@@ -8,15 +8,11 @@ CSpreadsheet::CSpreadsheet(const CSpreadsheet & other)
     _table.clear();
     for (const auto & element : other._table)
         _table.emplace(element.first, element.second->cloneNode(0, 0));
-    _stringTable.clear();
-    for (const auto & element : other._stringTable)
-        _stringTable[element.first] = element.second;
 }
 //======================================================================================================================
 CSpreadsheet::CSpreadsheet(CSpreadsheet && other) noexcept
 {
     _table = std::move(other._table);
-    _stringTable = std::move(other._stringTable);
 }
 //======================================================================================================================
 CSpreadsheet & CSpreadsheet::operator=(const CSpreadsheet & other)
@@ -26,7 +22,6 @@ CSpreadsheet & CSpreadsheet::operator=(const CSpreadsheet & other)
 
     CSpreadsheet copyToSwap(other);
     swap(_table, copyToSwap._table);
-    swap(_stringTable, copyToSwap._stringTable);
     return *this;
 }
 //======================================================================================================================
@@ -36,7 +31,6 @@ CSpreadsheet & CSpreadsheet::operator=(CSpreadsheet && other) noexcept
         return *this;
 
     _table = std::move(other._table);
-    _stringTable = std::move(other._stringTable);
     return *this;
 }
 //======================================================================================================================
@@ -49,7 +43,8 @@ bool CSpreadsheet::loadSell(const string & cell, CSpreadsheet & spreadSheet)
     size_t index = 1;
     for (; index < cell.size() && cell[index] != 'r'; index++)
     {
-        if (cell[index] < '0' || cell[index] > '9')
+        if ((cell[index] < 'a' || cell[index] > 'z') &&
+            (cell[index] < 'A' || cell[index] > 'Z'))
             return false;
         column += cell[index];
     }
@@ -66,7 +61,7 @@ bool CSpreadsheet::loadSell(const string & cell, CSpreadsheet & spreadSheet)
 
     try
     {
-        spreadSheet.setCell(CPos(stoul(column), stoul(row)), value);
+        spreadSheet.setCell(CPos(column + row), value);
         return true;
     }
     catch (const exception & ex ) { return false; }
@@ -88,19 +83,19 @@ bool CSpreadsheet::load(std::istream & is)
         }
     }
     _table = std::move(newSpreadSheet._table);
-    _stringTable = std::move(newSpreadSheet._stringTable);
     return true;
 }
 //======================================================================================================================
 bool CSpreadsheet::save(std::ostream & os) const
 {
-    string fullTable;
-    for (const auto & element : _stringTable)
-        fullTable += "c" + to_string(element.first._column) +
-                     "r" + to_string(element.first._row) +
-                     "_" + element.second + '|';
-
-    os << fullTable;
+    for (const auto & element : _table)
+    {
+        os << "c" + element.first.columnToString() +
+              "r" + to_string(element.first._row) +
+              "_=";
+        element.second->printTree(os);
+        os << '|';
+    }
     return true;
 }
 //======================================================================================================================
@@ -109,9 +104,8 @@ bool CSpreadsheet::setCell(CPos pos, std::string contents)
     try
     {
         Builder builder;
-        parseExpression(contents, builder);
+        parseExpression(std::move(contents), builder);
         _table[pos] = std::move(builder.builderStack.top());
-        _stringTable[pos] = std::move(contents);
     }
     catch (const exception & ex)
     {
@@ -153,12 +147,10 @@ void CSpreadsheet::copyRect(CPos dst, CPos src, int w, int h)
             else
                 tmpTable.emplace(CPos(column + columnShift, row + rowShift),
                                  new Operand(monostate()));
-            // need to add copy of the stringTable
         }
     }
 
     for (auto & element : tmpTable)
         _table[element.first] = std::move(element.second);
-    // need to add moving elements from tmpStringTable to stringTable
 }
 //======================================================================================================================
