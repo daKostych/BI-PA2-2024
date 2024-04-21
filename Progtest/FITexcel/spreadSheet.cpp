@@ -36,15 +36,14 @@ CSpreadsheet & CSpreadsheet::operator=(CSpreadsheet && other) noexcept
 //======================================================================================================================
 bool CSpreadsheet::loadSell(const string & cell, CSpreadsheet & spreadSheet)
 {
-    string column, row ,value;
+    string column, row, value;
     if (cell[0] != 'c')
         return false;
 
     size_t index = 1;
     for (; index < cell.size() && cell[index] != 'r'; index++)
     {
-        if ((cell[index] < 'a' || cell[index] > 'z') &&
-            (cell[index] < 'A' || cell[index] > 'Z'))
+        if (cell[index] < 'A' || cell[index] > 'Z')
             return false;
         column += cell[index];
     }
@@ -55,9 +54,8 @@ bool CSpreadsheet::loadSell(const string & cell, CSpreadsheet & spreadSheet)
             return false;
         row += cell[index];
     }
-    index++;
-    for (; index < cell.size(); index++)
-        value += cell[index];
+    index ++;
+    value = cell.substr(index);
 
     try
     {
@@ -72,7 +70,8 @@ bool CSpreadsheet::load(std::istream & is)
     CSpreadsheet newSpreadSheet;
     string fullTable, tablePart;
     while (getline(is, tablePart))
-        fullTable += tablePart;
+        fullTable += tablePart + '\n';
+    fullTable.erase(fullTable.size()-1);
     for(size_t i = 0, from = 0; i < fullTable.size(); i++)
     {
         if (fullTable[i] == '|')
@@ -128,7 +127,6 @@ void CSpreadsheet::copyRect(CPos dst, CPos src, int w, int h)
         return;
 
     map<CPos, ANode> tmpTable;
-    map<CPos, string> tmpStringTable;
     int columnShift = static_cast<int>(max(dst._column, src._column) - min(dst._column, src._column));
     if (max(dst._column, src._column) == src._column)
         columnShift = -columnShift;
@@ -144,9 +142,6 @@ void CSpreadsheet::copyRect(CPos dst, CPos src, int w, int h)
             if (iterator != _table.end())
                 tmpTable.emplace(CPos(column + columnShift, row + rowShift),
                                  _table[CPos(column, row)]->cloneNode(columnShift, rowShift));
-            else
-                tmpTable.emplace(CPos(column + columnShift, row + rowShift),
-                                 new Operand(monostate()));
         }
     }
 
