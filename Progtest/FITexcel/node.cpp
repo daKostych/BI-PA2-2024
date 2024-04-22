@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <cmath>
+#include <deque>
 
 //https://www.cppstories.com/2018/06/variant/
 template<class... Ts>
@@ -100,20 +101,27 @@ void OperatorComp::printTree(ostream & os) const
     os << ')';
 }
 //======================================================================================================================
-CValue Operand::evaluateNode(map<CPos, ANode> & table) const { return _val; }
+CValue Operand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const { return _val; }
 //======================================================================================================================
-CValue RefOperand::evaluateNode(map<CPos, ANode> & table) const
+CValue RefOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     auto iterator = table.find(_referencedPosition);
     if (iterator == table.end())
         return monostate();
-    return iterator->second->evaluateNode(table);
+
+    auto callerPos = find(callers.begin(), callers.end(), _referencedPosition);
+    if (callerPos != callers.end())
+        return monostate();
+    callers.push_back(_referencedPosition);
+    CValue result = iterator->second->evaluateNode(table, callers);
+    callers.pop_back();
+    return result;
 }
 //======================================================================================================================
-CValue OperatorAdd::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorAdd::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue left = _lhs->evaluateNode(table);
-    CValue right = _rhs->evaluateNode(table);
+    CValue left = _lhs->evaluateNode(table, callers);
+    CValue right = _rhs->evaluateNode(table, callers);
     CValue result;
 
     visit(overload
@@ -128,10 +136,10 @@ CValue OperatorAdd::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-CValue OperatorSub::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorSub::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue left = _lhs->evaluateNode(table);
-    CValue right = _rhs->evaluateNode(table);
+    CValue left = _lhs->evaluateNode(table, callers);
+    CValue right = _rhs->evaluateNode(table, callers);
     CValue result;
 
     visit(overload
@@ -143,10 +151,10 @@ CValue OperatorSub::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-CValue OperatorMul::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorMul::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue left = _lhs->evaluateNode(table);
-    CValue right = _rhs->evaluateNode(table);
+    CValue left = _lhs->evaluateNode(table, callers);
+    CValue right = _rhs->evaluateNode(table, callers);
     CValue result;
 
     visit(overload
@@ -158,10 +166,10 @@ CValue OperatorMul::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-CValue OperatorDiv::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorDiv::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue left = _lhs->evaluateNode(table);
-    CValue right = _rhs->evaluateNode(table);
+    CValue left = _lhs->evaluateNode(table, callers);
+    CValue right = _rhs->evaluateNode(table, callers);
     CValue result;
 
     visit(overload
@@ -174,10 +182,10 @@ CValue OperatorDiv::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-CValue OperatorPow::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorPow::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue left = _lhs->evaluateNode(table);
-    CValue right = _rhs->evaluateNode(table);
+    CValue left = _lhs->evaluateNode(table, callers);
+    CValue right = _rhs->evaluateNode(table, callers);
     CValue result;
 
     visit(overload
@@ -189,9 +197,9 @@ CValue OperatorPow::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-CValue OperatorNeg::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorNeg::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue value = _node->evaluateNode(table);
+    CValue value = _node->evaluateNode(table, callers);
     CValue result;
 
     visit(overload
@@ -203,10 +211,10 @@ CValue OperatorNeg::evaluateNode(map<CPos, ANode> & table) const
     return result;
 }
 //======================================================================================================================
-CValue OperatorComp::evaluateNode(map<CPos, ANode> & table) const
+CValue OperatorComp::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
-    CValue left = _lhs->evaluateNode(table);
-    CValue right = _rhs->evaluateNode(table);
+    CValue left = _lhs->evaluateNode(table, callers);
+    CValue right = _rhs->evaluateNode(table, callers);
     CValue result;
 
     visit(overload

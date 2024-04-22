@@ -4,6 +4,7 @@
 #include <variant>
 #include <memory>
 #include <map>
+#include <deque>
 
 using CValue = std::variant<std::monostate, double, std::string>;
 class Node;
@@ -14,7 +15,7 @@ class Node
 {
 public:
     virtual ~Node() = default;
-    virtual CValue evaluateNode(map<CPos, ANode> & table) const = 0;
+    virtual CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const = 0;
     virtual Node * cloneNode(int columnShift, int rowShift) const = 0;
     virtual void printTree(ostream & os) const = 0;
 };
@@ -23,7 +24,7 @@ class Operand : public Node
 {
 public:
     Operand(CValue newValue) : _val(std::move(newValue)) {};
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -37,7 +38,7 @@ public:
     RefOperand(CPos reference, bool rowAb, bool columnAb) : _referencedPosition(reference),
                                                             _rowAbsolute(rowAb),
                                                             _columnAbsolute(columnAb) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -51,7 +52,7 @@ class OperatorAdd : public Node
 {
 public:
     OperatorAdd(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -63,7 +64,7 @@ class OperatorSub : public Node
 {
 public:
     OperatorSub(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -75,7 +76,7 @@ class OperatorMul : public Node
 {
 public:
     OperatorMul(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -87,7 +88,7 @@ class OperatorDiv : public Node
 {
 public:
     OperatorDiv(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -99,7 +100,7 @@ class OperatorPow : public Node
 {
 public:
     OperatorPow(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -111,7 +112,7 @@ class OperatorNeg : public Node
 {
 public:
     OperatorNeg(ANode node) : _node(std::move(node)) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
@@ -125,7 +126,7 @@ public:
     OperatorComp(ANode l, ANode r, const std::string sign) : _lhs(std::move(l)),
                                                              _rhs(std::move(r)),
                                                              _sign(sign) {}
-    CValue evaluateNode(map<CPos, ANode> & table) const override;
+    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
