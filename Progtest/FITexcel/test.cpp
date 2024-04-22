@@ -125,6 +125,12 @@ int main()
     iss.clear();
     iss.str(data);
     assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("A6")),
+                      CValue("raw text with any characters, including a quote \" or a newline\n")));
+    assert(valueMatch(x1.getValue(CPos("A7")),
+                      CValue("quoted string, quotes must be doubled: \". Moreover, backslashes are needed for C++.")));
+
     assert(valueMatch(x1.getValue(CPos("B1")), CValue(3012.0)));
     assert(valueMatch(x1.getValue(CPos("B2")), CValue(-194.0)));
     assert(valueMatch(x1.getValue(CPos("B3")), CValue(4096.0)));
@@ -194,6 +200,156 @@ int main()
     assert(valueMatch(x0.getValue(CPos("H12")), CValue(25.0)));
     assert(valueMatch(x0.getValue(CPos("H13")), CValue(-22.0)));
     assert(valueMatch(x0.getValue(CPos("H14")), CValue(-22.0)));
+
+
+    oss.clear();
+    oss.str("");
+    assert(x0.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("F10")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("F11")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("F12")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("F13")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("F14")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("G10")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("G11")), CValue(75.0)));
+    assert(valueMatch(x1.getValue(CPos("G12")), CValue(25.0)));
+    assert(valueMatch(x1.getValue(CPos("G13")), CValue(65.0)));
+    assert(valueMatch(x1.getValue(CPos("G14")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("H10")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("H11")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("H12")), CValue(25.0)));
+    assert(valueMatch(x1.getValue(CPos("H13")), CValue(-22.0)));
+    assert(valueMatch(x1.getValue(CPos("H14")), CValue(-22.0)));
+
+    x1.copyRect(CPos("f13"), CPos("G13"), 2, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("F13")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("F14")), CValue(15.0)));
+    assert(valueMatch(x1.getValue(CPos("G13")), CValue(65.0)));
+    assert(valueMatch(x1.getValue(CPos("G14")), CValue(65.0)));
+
+    x1.copyRect(CPos("f12"), CPos("G11"), 2, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("F12")), CValue(35.0)));
+    assert(valueMatch(x1.getValue(CPos("F13")), CValue(35.0)));
+    assert(valueMatch(x1.getValue(CPos("G13")), CValue(35.0)));
+    assert(valueMatch(x1.getValue(CPos("G12")), CValue(25.0)));
+
+    x1.copyRect(CPos("h14"), CPos("G13"), 2, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("h14")), CValue(45.0)));
+    assert(valueMatch(x1.getValue(CPos("h15")), CValue(-22.0)));
+    assert(valueMatch(x1.getValue(CPos("i14")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("I15")), CValue()));
+
+    assert(x1.setCell(CPos("j3"), "=$B4+10"));
+    assert(x1.setCell(CPos("j4"), "=B$5 + 10"));
+    assert(x1.setCell(CPos("k3"), "=$E$3   +  10"));
+    assert(x1.setCell(CPos("k4"), "=E4 +   10"));
+    assert(x1.setCell(CPos("k5"), "=F13 -   H$14"));
+    assert(x1.setCell(CPos("l4"), "=$B6 +   B$6"));
+    assert(x1.setCell(CPos("l5"), "=F12 + H14"));
+    assert(valueMatch(x1.getValue(CPos("j3")), CValue(12554.0)));
+    assert(valueMatch(x1.getValue(CPos("j4")), CValue(20468.0)));
+    assert(valueMatch(x1.getValue(CPos("k3")), CValue(100.0)));
+    assert(valueMatch(x1.getValue(CPos("k4")), CValue(110.0)));
+    assert(valueMatch(x1.getValue(CPos("K5")), CValue(-10.0)));
+    assert(valueMatch(x1.getValue(CPos("l4")), CValue(81832.0)));
+    assert(valueMatch(x1.getValue(CPos("L5")), CValue(80.0)));
+
+    x1.copyRect(CPos("j3"), CPos("k4"), 2, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("j3")), CValue(50.0)));
+    assert(valueMatch(x1.getValue(CPos("j4")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("k3")),
+                      CValue("20458.000000raw text with any characters, including a quote \" or a newline\n")));
+    assert(valueMatch(x1.getValue(CPos("k4")), CValue()));
+
+    x1.copyRect(CPos("k5"), CPos("j3"), 2, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("k5")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("k6")), CValue(-30.0)));
+    assert(valueMatch(x1.getValue(CPos("l5")), CValue()));
+    assert(valueMatch(x1.getValue(CPos("l6")), CValue(13.0)));
+
+    assert(x1.setCell(CPos("l4"), "=$B4 +   B$4"));
+    assert(x1.setCell(CPos("l5"), "=$B5 +   B5"));
+    assert(valueMatch(x1.getValue(CPos("l4")), CValue(25088.0)));
+    assert(valueMatch(x1.getValue(CPos("L5")), CValue(40916.0)));
+
+    x1.copyRect(CPos("l5"), CPos("l4"), 1, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("l4")), CValue(25088.0)));
+    assert(valueMatch(x1.getValue(CPos("L5")), CValue(33002.0)));
+    assert(valueMatch(x1.getValue(CPos("L6")), CValue(81832.0)));
+
+    x1.copyRect(CPos("l4"), CPos("l5"), 1, 2);
+
+    oss.clear();
+    oss.str("");
+    assert(x1.save(oss));
+    data = oss.str();
+    iss.clear();
+    iss.str(data);
+    assert(x1.load(iss));
+
+    assert(valueMatch(x1.getValue(CPos("l4")), CValue(25088.0)));
+    assert(valueMatch(x1.getValue(CPos("L5")), CValue(40916.0)));
+    assert(valueMatch(x1.getValue(CPos("L6")), CValue(81832.0)));
+
     return EXIT_SUCCESS;
 }
 
