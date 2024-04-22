@@ -24,8 +24,8 @@ public:
     void valNumber(double val) override;
     void valString(std::string val) override;
     void valReference(std::string val) override;
-    //void valRange(std::string val) override;
-    //void funcCall(std::string fnName, int paramCount) override;
+    void valRange(std::string val) override;
+    void funcCall(std::string fnName, int paramCount) override;
 
     stack<ANode> builderStack;
 
