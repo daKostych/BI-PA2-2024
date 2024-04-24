@@ -73,43 +73,44 @@ CValue RefOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers)
     return result;
 }
 //======================================================================================================================
-CValue RangeOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const { return monostate(); } // todo
+CValue RangeOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const { return monostate(); }
 //======================================================================================================================
 Node * Operand::cloneNode(int columnShift, int rowShift) const { return new Operand(_val); }
 //======================================================================================================================
 Node * RefOperand::cloneNode(int columnShift, int rowShift) const
 {
-    unsigned newRow = _referencedPosition._row,
-             newColumn = _referencedPosition._column;
-    if (!_rowAbsolute)
-        newRow += rowShift;
-    if (!_columnAbsolute)
-        newColumn += columnShift;
+    ShiftedPos shifted = shiftPosition(_referencedPosition,
+                                       columnShift, rowShift,
+                                       _rowAbsolute, _columnAbsolute);
 
-    return new RefOperand(CPos(newColumn, newRow),
+    return new RefOperand(CPos(shifted.first, shifted.second),
                           _rowAbsolute,
                           _columnAbsolute);
 }
 //======================================================================================================================
 Node * RangeOperand::cloneNode(int columnShift, int rowShift) const
 {
-    unsigned newUpperLeftRow = _upperLeft._row,
-             newUpperLeftColumn = _upperLeft._column;
-    if (!_ulRowAbs)
-        newUpperLeftRow += rowShift;
-    if (!_ulColumnAbs)
-        newUpperLeftColumn += columnShift;
+    ShiftedPos shiftedUpperLeft = shiftPosition(_upperLeft,
+                                                columnShift, rowShift,
+                                                _ulRowAbs, _ulColumnAbs);
 
-    unsigned newLowerRightRow = _lowerRight._row,
-             newLowerRightColumn = _lowerRight._column;
-    if (!_lrRowAbs)
-        newLowerRightRow += rowShift;
-    if (!_lrColumnAbs)
-        newLowerRightColumn += columnShift;
+    ShiftedPos shiftedLowerRight = shiftPosition(_lowerRight,
+                                                 columnShift, rowShift,
+                                                 _lrRowAbs, _lrColumnAbs);
 
-    return new RangeOperand(CPos(newUpperLeftColumn, newUpperLeftRow),
-                            CPos(newLowerRightColumn, newLowerRightRow),
+    return new RangeOperand(CPos(shiftedUpperLeft.first, shiftedUpperLeft.second),
+                            CPos(shiftedLowerRight.first, shiftedLowerRight.second),
                             _ulColumnAbs, _ulRowAbs,
                             _lrColumnAbs, _lrRowAbs);
 }
 //======================================================================================================================
+ShiftedPos Node::shiftPosition(const CPos & pos, int columnShift, int rowShift, bool rowAbs, bool columnAbs)
+{
+    unsigned newRow = pos._row,
+            newColumn = pos._column;
+    if (!rowAbs)
+        newRow += rowShift;
+    if (!columnAbs)
+        newColumn += columnShift;
+    return make_pair(newColumn, newRow);
+}

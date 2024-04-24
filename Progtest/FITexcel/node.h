@@ -9,6 +9,7 @@
 using CValue = std::variant<std::monostate, double, std::string>;
 class Node;
 using ANode = unique_ptr<Node>;
+using ShiftedPos = pair<unsigned, unsigned>;
 
 //https://www.cppstories.com/2018/06/variant/
 template<class... Ts>
@@ -23,6 +24,9 @@ public:
     virtual CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const = 0;
     virtual Node * cloneNode(int columnShift, int rowShift) const = 0;
     virtual void printTree(ostream & os) const = 0;
+
+protected:
+    static ShiftedPos shiftPosition(const CPos & pos, int columnShift, int rowShift, bool rowAbs, bool columnAbs);
 };
 //======================================================================================================================
 class Operand : public Node
