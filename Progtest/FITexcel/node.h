@@ -10,6 +10,11 @@ using CValue = std::variant<std::monostate, double, std::string>;
 class Node;
 using ANode = unique_ptr<Node>;
 
+//https://www.cppstories.com/2018/06/variant/
+template<class... Ts>
+struct overload : Ts ...{ using Ts::operator()...; };
+template<class... Ts> overload(Ts...) -> overload<Ts...>;
+
 //======================================================================================================================
 class Node
 {
@@ -48,92 +53,24 @@ private:
     bool _columnAbsolute = false;
 };
 //======================================================================================================================
-class OperatorAdd : public Node
+class RangeOperand : public Node
 {
 public:
-    OperatorAdd(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
+    RangeOperand(CPos ul, CPos lr, bool ulColAb, bool ulRowAb, bool lrColAb, bool lrRowAb)
+                : _upperLeft(ul), _lowerRight(lr),
+                  _ulColumnAbs(ulColAb), _ulRowAbs(ulRowAb),
+                  _lrColumnAbs(lrColAb), _lrRowAbs(lrRowAb) {}
+
     CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
 private:
-    ANode _lhs, _rhs;
-};
-//======================================================================================================================
-class OperatorSub : public Node
-{
-public:
-    OperatorSub(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
-    Node * cloneNode(int columnShift, int rowShift) const override;
-    void printTree(ostream & os) const override;
+    CPos _upperLeft, _lowerRight;
+    bool _ulColumnAbs = false,
+         _ulRowAbs = false,
+         _lrColumnAbs = false,
+         _lrRowAbs = false;
 
-private:
-    ANode _lhs, _rhs;
-};
-//======================================================================================================================
-class OperatorMul : public Node
-{
-public:
-    OperatorMul(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
-    Node * cloneNode(int columnShift, int rowShift) const override;
-    void printTree(ostream & os) const override;
-
-private:
-    ANode _lhs, _rhs;
-};
-//======================================================================================================================
-class OperatorDiv : public Node
-{
-public:
-    OperatorDiv(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
-    Node * cloneNode(int columnShift, int rowShift) const override;
-    void printTree(ostream & os) const override;
-
-private:
-    ANode _lhs, _rhs;
-};
-//======================================================================================================================
-class OperatorPow : public Node
-{
-public:
-    OperatorPow(ANode l, ANode r) : _lhs(std::move(l)), _rhs(std::move(r)) {}
-    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
-    Node * cloneNode(int columnShift, int rowShift) const override;
-    void printTree(ostream & os) const override;
-
-private:
-    ANode _lhs, _rhs;
-};
-//======================================================================================================================
-class OperatorNeg : public Node
-{
-public:
-    OperatorNeg(ANode node) : _node(std::move(node)) {}
-    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
-    Node * cloneNode(int columnShift, int rowShift) const override;
-    void printTree(ostream & os) const override;
-
-private:
-    ANode _node;
-};
-//======================================================================================================================
-class OperatorComp : public Node
-{
-public:
-    OperatorComp(ANode l, ANode r, const std::string sign) : _lhs(std::move(l)),
-                                                             _rhs(std::move(r)),
-                                                             _sign(sign) {}
-    CValue evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const override;
-    Node * cloneNode(int columnShift, int rowShift) const override;
-    void printTree(ostream & os) const override;
-
-private:
-    void compare(const CValue & lhs, const CValue & rhs, CValue & result) const;
-
-    ANode _lhs, _rhs;
-    std::string _sign;
 };
 //======================================================================================================================
