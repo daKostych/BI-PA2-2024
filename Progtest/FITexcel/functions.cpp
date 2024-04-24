@@ -81,6 +81,7 @@ CValue FunctionSum::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
             }, tmp);
         }
     }
+    delete range;
     if (foundNumber)
         return {result};
     else
@@ -108,7 +109,6 @@ CValue FunctionCount::evaluateNode(map<CPos, ANode> & table, deque<CPos> & calle
             }, tmp);
         }
     }
-    delete copyRange;
     delete range;
     copyRange = nullptr;
     range = nullptr;
@@ -140,7 +140,7 @@ CValue FunctionMin::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
             }, tmp);
         }
     }
-    delete copyRange;
+    delete range;
     if (foundNumber)
         return {min};
     else
@@ -172,7 +172,7 @@ CValue FunctionMax::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
             }, tmp);
         }
     }
-    delete copyRange;
+    delete range;
     if (foundNumber)
         return {max};
     else
@@ -202,7 +202,7 @@ CValue FunctionCountVal::evaluateNode(map<CPos, ANode> & table, deque<CPos> & ca
             }, tmp, valueToCount);
         }
     }
-    delete copyRange;
+    delete range;
     return {count};
 }
 //======================================================================================================================
