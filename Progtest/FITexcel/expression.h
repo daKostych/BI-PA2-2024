@@ -21,8 +21,8 @@ public:
     virtual void valNumber(double val) = 0;
     virtual void valString(std::string val) = 0;
     virtual void valReference(std::string val) = 0;
-    //virtual void valRange(std::string val) = 0;
-    //virtual void funcCall(std::string fnName, int paramCount) = 0;
+    virtual void valRange(std::string val) = 0;
+    virtual void funcCall(std::string fnName, int paramCount) = 0;
 };
 
 void parseExpression(std::string expr, CExprBuilder & builder);
