@@ -2,6 +2,8 @@
 
 #include "expression.h"
 #include "node.h"
+#include "operators.h"
+#include "functions.h"
 #include <stack>
 
 class Builder : public CExprBuilder
