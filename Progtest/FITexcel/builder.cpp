@@ -135,8 +135,11 @@ void Builder::valRange(std::string val)
     bool upperLeftColumnAb = val[0] == '$';
     bool lowerRightRowAb = val.substr(colonPos + 2).find('$') != string::npos;
     bool lowerRightColumnAb = val[colonPos + 1] == '$';
-    builderStack.emplace(new RangeOperand(CPos(removeDollars(val.substr(0, colonPos))),
-                                             CPos(removeDollars(val.substr(colonPos + 1))),
+    CPos upperLeft(removeDollars(val.substr(0, colonPos)));
+    CPos lowerRight(removeDollars(val.substr(colonPos + 1)));
+    if (!isValidRange(upperLeft, lowerRight))
+        throw logic_error("Invalid range!");
+    builderStack.emplace(new RangeOperand(upperLeft, lowerRight,
                                              upperLeftColumnAb, upperLeftRowAb,
                                              lowerRightColumnAb, lowerRightRowAb));
 }
