@@ -197,14 +197,16 @@ string Builder::removeDollars(const string & str)
 {
     string result;
     int dollarCnt = 0;
-    for (char c : str)
+    for (size_t i = 0; i < str.size(); i++)
     {
-        if (c != '$')
-            result += c;
+        if (str[i] != '$')
+            result += str[i];
         else
-            dollarCnt++;
+            i != 0 ? (str[i - 1] == '$' ? dollarCnt += 0
+                                        : dollarCnt++)
+                   : dollarCnt++;
     }
-    if (dollarCnt > 4)
+    if (dollarCnt > 2)
         throw invalid_argument("Invalid reference!");
     return result;
 }
