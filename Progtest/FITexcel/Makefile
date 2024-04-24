@@ -10,7 +10,7 @@ all: test
 deps:
 	g++ -MM *.cpp > Makefile.d
 
-test: builder.o node.o position.o spreadSheet.o test.o
+test: builder.o node.o operators.o functions.o position.o spreadSheet.o test.o
 	$(LD) $(CXXFLAGS) -o $@ $^ -L./$(MACHINE) -lexpression_parser
 
 %.o: %.cpp
