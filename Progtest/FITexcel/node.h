@@ -65,8 +65,9 @@ public:
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
-private:
     CPos _upperLeft, _lowerRight;
+
+private:
     bool _ulColumnAbs = false,
          _ulRowAbs = false,
          _lrColumnAbs = false,

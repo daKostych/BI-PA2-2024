@@ -350,6 +350,9 @@ int main()
     assert(valueMatch(x1.getValue(CPos("L5")), CValue(40916.0)));
     assert(valueMatch(x1.getValue(CPos("L6")), CValue(81832.0)));
 
+    assert(x1.setCell(CPos("h4"), "=sum($D0:E$4)"));
+    assert(valueMatch(x1.getValue(CPos("h4")), CValue(550.0)));
+
     return EXIT_SUCCESS;
 }
 
