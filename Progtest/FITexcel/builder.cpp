@@ -196,9 +196,16 @@ void Builder::funcCall(std::string fnName, int paramCount)
 string Builder::removeDollars(const string & str)
 {
     string result;
+    int dollarCnt = 0;
     for (char c : str)
+    {
         if (c != '$')
             result += c;
+        else
+            dollarCnt++;
+    }
+    if (dollarCnt > 4)
+        throw invalid_argument("Invalid reference!");
     return result;
 }
 //======================================================================================================================
