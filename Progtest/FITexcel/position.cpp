@@ -36,6 +36,12 @@ string CPos::columnToString() const
     return result;
 }
 //======================================================================================================================
+bool isValidRange(const CPos & upperLeft, const CPos & lowerRight)
+{
+    return (upperLeft._column <= lowerRight._column) &&
+           (upperLeft._row <= lowerRight._row);
+}
+//======================================================================================================================
 bool operator<(const CPos & lhs, const CPos & rhs)
 {
     if (lhs._column != rhs._column)
