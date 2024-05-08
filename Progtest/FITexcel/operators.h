@@ -3,6 +3,7 @@
 #include "node.h"
 
 //======================================================================================================================
+// OperatorAdd class represents the addition (+) operator node in the expression tree.
 class OperatorAdd : public Node
 {
 public:
@@ -12,9 +13,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _lhs, _rhs;
+    ANode _lhs; // Left operand of the addition operation.
+    ANode _rhs; // Right operand of the addition operation.
 };
 //======================================================================================================================
+// OperatorSub class represents the subtraction (-) operator node in the expression tree.
 class OperatorSub : public Node
 {
 public:
@@ -24,9 +27,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _lhs, _rhs;
+    ANode _lhs; // Left operand of the subtraction operation.
+    ANode _rhs; // Right operand of the subtraction operation.
 };
 //======================================================================================================================
+// OperatorMul class represents the multiplication (*) operator node in the expression tree.
 class OperatorMul : public Node
 {
 public:
@@ -36,9 +41,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _lhs, _rhs;
+    ANode _lhs; // Left operand of the multiplication operation.
+    ANode _rhs; // Right operand of the multiplication operation.
 };
 //======================================================================================================================
+// OperatorDiv class represents the division (/) operator node in the expression tree.
 class OperatorDiv : public Node
 {
 public:
@@ -48,9 +55,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _lhs, _rhs;
+    ANode _lhs; // Left operand of the division operation.
+    ANode _rhs; // Right operand of the division operation.
 };
 //======================================================================================================================
+// OperatorPow class represents the power (^) operator node in the expression tree.
 class OperatorPow : public Node
 {
 public:
@@ -60,9 +69,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _lhs, _rhs;
+    ANode _lhs; // Left operand of the power operation.
+    ANode _rhs; // Right operand of the power operation.
 };
 //======================================================================================================================
+// OperatorNeg class represents the unary negation (-) operator node in the expression tree.
 class OperatorNeg : public Node
 {
 public:
@@ -72,9 +83,10 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _node;
+    ANode _node; // Operand of the unary negation operation.
 };
 //======================================================================================================================
+// OperatorComp class represents a comparison (>, >=, <, <=, ==, <>) operator node in the expression tree.
 class OperatorComp : public Node
 {
 public:
@@ -86,9 +98,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
+    // Helper function to perform the actual comparison based on the comparison sign.
     void compare(const CValue & lhs, const CValue & rhs, CValue & result) const;
 
-    ANode _lhs, _rhs;
-    std::string _sign;
+    ANode _lhs,   // Left operand of the comparison operation.
+          _rhs;   // Right operand of the comparison operation.
+    string _sign; // Comparison sign (>, >=, <, <=, ==, <>).
 };
 //======================================================================================================================

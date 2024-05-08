@@ -8,6 +8,7 @@
 #include <cfloat>
 
 //======================================================================================================================
+// Print the expression tree for a sum function
 void FunctionSum::printTree(ostream & os) const
 {
     os << "sum(";
@@ -15,6 +16,7 @@ void FunctionSum::printTree(ostream & os) const
     os << ")";
 }
 //======================================================================================================================
+// Print the expression tree for a count function
 void FunctionCount::printTree(ostream & os) const
 {
     os << "count(";
@@ -22,6 +24,7 @@ void FunctionCount::printTree(ostream & os) const
     os << ")";
 }
 //======================================================================================================================
+// Print the expression tree for a min function
 void FunctionMin::printTree(ostream & os) const
 {
     os << "min(";
@@ -29,6 +32,7 @@ void FunctionMin::printTree(ostream & os) const
     os << ")";
 }
 //======================================================================================================================
+// Print the expression tree for a max function
 void FunctionMax::printTree(ostream & os) const
 {
     os << "max(";
@@ -36,6 +40,7 @@ void FunctionMax::printTree(ostream & os) const
     os << ")";
 }
 //======================================================================================================================
+// Print the expression tree for a countval function
 void FunctionCountVal::printTree(ostream & os) const
 {
     os << "countval(";
@@ -45,6 +50,7 @@ void FunctionCountVal::printTree(ostream & os) const
     os << ")";
 }
 //======================================================================================================================
+// Print the expression tree for an if function
 void FunctionIf::printTree(ostream & os) const
 {
     os << "if(";
@@ -56,6 +62,7 @@ void FunctionIf::printTree(ostream & os) const
     os << ")";
 }
 //======================================================================================================================
+// Evaluate the result of a sum function
 CValue FunctionSum::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     double result = 0.0;
@@ -77,7 +84,7 @@ CValue FunctionSum::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
                     result += value;
                     foundNumber = true;
                 },
-                [](const auto & value) {  }
+                [](const auto & value) { /* Handle non-double values */ }
             }, tmp);
         }
     }
@@ -88,6 +95,7 @@ CValue FunctionSum::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
         return {};
 }
 //======================================================================================================================
+// Evaluate the result of a count function
 CValue FunctionCount::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     double count = 0.0;
@@ -105,16 +113,15 @@ CValue FunctionCount::evaluateNode(map<CPos, ANode> & table, deque<CPos> & calle
             {
                 [&count](double value) { count++; },
                 [&count](const string & value) { count++; },
-                [](const auto & value) {  }
+                [](const auto & value) { /* Handle non-double values */ }
             }, tmp);
         }
     }
     delete range;
-    copyRange = nullptr;
-    range = nullptr;
     return {count};
 }
 //======================================================================================================================
+// Evaluate the result of a min function
 CValue FunctionMin::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     auto min = DBL_MAX;
@@ -136,7 +143,7 @@ CValue FunctionMin::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
                     min = (value < min) ? value : min;
                     foundNumber = true;
                 },
-                [](const auto & value) {  }
+                [](const auto & value) { /* Handle non-double values */ }
             }, tmp);
         }
     }
@@ -147,6 +154,7 @@ CValue FunctionMin::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
         return {};
 }
 //======================================================================================================================
+// Evaluate the result of a max function
 CValue FunctionMax::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     auto max = DBL_MIN;
@@ -168,7 +176,7 @@ CValue FunctionMax::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
                     max = (value > max) ? value : max;
                     foundNumber = true;
                 },
-                [](const auto & value) {  }
+                [](const auto & value) { /* Handle non-double values */ }
             }, tmp);
         }
     }
@@ -179,6 +187,7 @@ CValue FunctionMax::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers
         return {};
 }
 //======================================================================================================================
+// Evaluate the result of a countval function
 CValue FunctionCountVal::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     double count = 0.0;
@@ -198,7 +207,7 @@ CValue FunctionCountVal::evaluateNode(map<CPos, ANode> & table, deque<CPos> & ca
                 [&count] (double val1, double val2){ count = (val1 == val2) ? count + 1 : count; },
                 [&count] (const string & val1, const string & val2) { count = (val1 == val2) ? count + 1
                                                                                                     : count; },
-                [] (const auto & val1 , const auto & val2) {  }
+                [] (const auto & val1 , const auto & val2) { /* Handle other value types */ }
             }, tmp, valueToCount);
         }
     }
@@ -206,6 +215,7 @@ CValue FunctionCountVal::evaluateNode(map<CPos, ANode> & table, deque<CPos> & ca
     return {count};
 }
 //======================================================================================================================
+// Evaluate the result of an if function
 CValue FunctionIf::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     CValue condition = _condition->evaluateNode(table, callers);
@@ -219,37 +229,43 @@ CValue FunctionIf::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers)
             else
                 result = _ifFalse->evaluateNode(table, callers);
         },
-        [&result] (const auto & value) { result = monostate(); }
+        [&result] (const auto & value) { result = monostate(); } // Default result for non-double values
     }, condition);
     return result;
 }
 //======================================================================================================================
+// Clone the node for a sum function
 Node * FunctionSum::cloneNode(int columnShift, int rowShift) const
 {
     return new FunctionSum(ANode(_range->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
+// Clone the node for a count function
 Node * FunctionCount::cloneNode(int columnShift, int rowShift) const
 {
     return new FunctionCount(ANode(_range->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
+// Clone the node for a min function
 Node * FunctionMin::cloneNode(int columnShift, int rowShift) const
 {
     return new FunctionMin(ANode(_range->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
+// Clone the node for a max function
 Node * FunctionMax::cloneNode(int columnShift, int rowShift) const
 {
     return new FunctionMax(ANode(_range->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
+// Clone the node for a countval function
 Node * FunctionCountVal::cloneNode(int columnShift, int rowShift) const
 {
     return new FunctionCountVal(ANode(_value->cloneNode(columnShift, rowShift)),
                                 ANode(_range->cloneNode(columnShift, rowShift)));
 }
 //======================================================================================================================
+// Clone the node for an if function
 Node * FunctionIf::cloneNode(int columnShift, int rowShift) const
 {
     return new FunctionIf(ANode(_condition->cloneNode(columnShift, rowShift)),

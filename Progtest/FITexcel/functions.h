@@ -3,6 +3,7 @@
 #include "node.h"
 
 //======================================================================================================================
+// FunctionSum class represents a node that computes the sum of the number values within a specified range.
 class FunctionSum : public Node
 {
 public:
@@ -12,9 +13,10 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _range;
+    ANode _range; // The range over which the sum is computed
 };
 //======================================================================================================================
+// FunctionCount class represents a node that counts the number of the defined values within a specified range.
 class FunctionCount : public Node
 {
 public:
@@ -24,9 +26,10 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _range;
+    ANode _range; // The range over which the count is computed
 };
 //======================================================================================================================
+// FunctionMin class represents a node that computes the minimum number value within a specified range.
 class FunctionMin : public Node
 {
 public:
@@ -36,9 +39,10 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _range;
+    ANode _range; // The range over which the minimum value is computed
 };
 //======================================================================================================================
+// FunctionMax class represents a node that computes the maximum number value within a specified range.
 class FunctionMax : public Node
 {
 public:
@@ -48,9 +52,10 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _range;
+    ANode _range; // The range over which the maximum value is computed
 };
 //======================================================================================================================
+// FunctionCountVal class represents a node that counts occurrences of a specific value within a specified range.
 class FunctionCountVal : public Node
 {
 public:
@@ -61,10 +66,11 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _value;
-    ANode _range;
+    ANode _value; // The value to be counted within the range
+    ANode _range; // The range over which the value is counted
 };
 //======================================================================================================================
+// FunctionIf class represents a node that performs conditional evaluation based on a condition.
 class FunctionIf : public Node
 {
 public:
@@ -76,8 +82,8 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    ANode _condition;
-    ANode _ifTrue;
-    ANode _ifFalse;
+    ANode _condition; // The condition to evaluate
+    ANode _ifTrue;    // Node to evaluate if the condition is true
+    ANode _ifFalse;   // Node to evaluate if the condition is false
 };
 //======================================================================================================================

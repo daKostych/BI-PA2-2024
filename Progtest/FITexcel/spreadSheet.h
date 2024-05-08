@@ -17,24 +17,38 @@ using ANode = unique_ptr<Node>;
 class CSpreadsheet
 {
 public:
+    // Static function to return supported capabilities
     static unsigned capabilities()
     {
         return SPREADSHEET_CYCLIC_DEPS | SPREADSHEET_FUNCTIONS | SPREADSHEET_FILE_IO | SPREADSHEET_SPEED;
     }
-    CSpreadsheet() = default;
-    CSpreadsheet(const CSpreadsheet & other);
-    CSpreadsheet(CSpreadsheet && other) noexcept;
-    CSpreadsheet & operator=(const CSpreadsheet & other);
-    CSpreadsheet & operator=(CSpreadsheet && other) noexcept;
 
+    // Constructors and assignment operators
+    CSpreadsheet() = default;                                 // Default constructor
+    CSpreadsheet(const CSpreadsheet & other);                 // Copy constructor
+    CSpreadsheet(CSpreadsheet && other) noexcept;             // Move constructor
+    CSpreadsheet & operator=(const CSpreadsheet & other);     // Copy assignment operator
+    CSpreadsheet & operator=(CSpreadsheet && other) noexcept; // Move assignment operator
+
+    // Load spreadsheet from input stream
     bool load(std::istream & is);
+
+    // Static method to load spreadsheet from a specified cell
     static bool loadSell(const string & cell, CSpreadsheet & spreadSheet);
+
+    // Save spreadsheet to output stream
     bool save(std::ostream & os) const;
+
+    // Set the contents of a cell at the specified position
     bool setCell(CPos pos, std::string contents);
+
+    // Get the value stored in the cell at the specified position
     CValue getValue(CPos pos);
+
+    // Copy a rectangular area of cells from source to destination
     void copyRect(CPos dst, CPos src, int w = 1, int h = 1);
 
 private:
-    map<CPos, ANode> _table;
+    std::map<CPos, ANode> _table; // Internal representation of the spreadsheet
 };
 //======================================================================================================================

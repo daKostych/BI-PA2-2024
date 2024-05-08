@@ -5,9 +5,10 @@
 #include <cmath>
 #include <deque>
 
-using CValue = std::variant<std::monostate, double, std::string>;
+using CValue = variant<monostate, double, string>;
 using ANode = unique_ptr<Node>;
 //======================================================================================================================
+// Print the value of an Operand node to the output stream.
 void Operand::printTree(ostream & os) const
 {
     visit(overload
@@ -29,6 +30,7 @@ void Operand::printTree(ostream & os) const
     }, _val);
 }
 //======================================================================================================================
+// Print the referenced position of a RefOperand node to the output stream.
 void RefOperand::printTree(ostream & os) const
 {
     if (_columnAbsolute)
@@ -38,7 +40,9 @@ void RefOperand::printTree(ostream & os) const
         os << '$';
     os << _referencedPosition._row;
 }
+
 //======================================================================================================================
+// Print the range boundaries of a RangeOperand node to the output stream.
 void RangeOperand::printTree(ostream & os) const
 {
     if (_ulColumnAbs)
@@ -56,8 +60,10 @@ void RangeOperand::printTree(ostream & os) const
     os << _lowerRight._row;
 }
 //======================================================================================================================
+// Evaluate the value of an Operand node.
 CValue Operand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const { return _val; }
 //======================================================================================================================
+// Evaluate the value referenced by a RefOperand node from a given table of values.
 CValue RefOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const
 {
     auto iterator = table.find(_referencedPosition);
@@ -73,10 +79,13 @@ CValue RefOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers)
     return result;
 }
 //======================================================================================================================
+// Evaluate the value of a RangeOperand node.
 CValue RangeOperand::evaluateNode(map<CPos, ANode> & table, deque<CPos> & callers) const { return monostate(); }
 //======================================================================================================================
+// Clone an Operand node.
 Node * Operand::cloneNode(int columnShift, int rowShift) const { return new Operand(_val); }
 //======================================================================================================================
+// Clone a RefOperand node with optional column and row shifts.
 Node * RefOperand::cloneNode(int columnShift, int rowShift) const
 {
     ShiftedPos shifted = shiftPosition(_referencedPosition,
@@ -88,6 +97,7 @@ Node * RefOperand::cloneNode(int columnShift, int rowShift) const
                           _columnAbsolute);
 }
 //======================================================================================================================
+// Clone a RangeOperand node with optional column and row shifts.
 Node * RangeOperand::cloneNode(int columnShift, int rowShift) const
 {
     ShiftedPos shiftedUpperLeft = shiftPosition(_upperLeft,
@@ -104,10 +114,11 @@ Node * RangeOperand::cloneNode(int columnShift, int rowShift) const
                             _lrColumnAbs, _lrRowAbs);
 }
 //======================================================================================================================
+// Utility function to shift a position by specified column and row shifts based on absolute flags.
 ShiftedPos Node::shiftPosition(const CPos & pos, int columnShift, int rowShift, bool rowAbs, bool columnAbs)
 {
     unsigned newRow = pos._row,
-            newColumn = pos._column;
+             newColumn = pos._column;
     if (!rowAbs)
         newRow += rowShift;
     if (!columnAbs)

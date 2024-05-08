@@ -11,6 +11,7 @@ class Builder : public CExprBuilder
 public:
     Builder() : CExprBuilder() {};
 
+    // Override methods from CExprBuilder for building expressions
     void opAdd() override;
     void opSub() override;
     void opMul() override;
@@ -29,7 +30,7 @@ public:
     void valRange(std::string val) override;
     void funcCall(std::string fnName, int paramCount) override;
 
-    stack<ANode> builderStack;
+    stack<ANode> builderStack; // Stack to manage expression nodes
 
 private:
     static string removeDollars(const string & str);

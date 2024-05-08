@@ -6,16 +6,16 @@
 #include <map>
 #include <deque>
 
-using CValue = std::variant<std::monostate, double, std::string>;
-class Node;
+using CValue = variant<monostate, double, string>;
+class Node;  // Forward declaration of Node class
 using ANode = unique_ptr<Node>;
 using ShiftedPos = pair<unsigned, unsigned>;
 
-//https://www.cppstories.com/2018/06/variant/
+// https://www.cppstories.com/2018/06/variant/
+// Template for creating overloaded lambdas
 template<class... Ts>
 struct overload : Ts ...{ using Ts::operator()...; };
 template<class... Ts> overload(Ts...) -> overload<Ts...>;
-
 //======================================================================================================================
 class Node
 {
@@ -38,7 +38,7 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    CValue _val;
+    CValue _val;  // Value held by Operand
 };
 //======================================================================================================================
 class RefOperand : public Node
@@ -52,9 +52,9 @@ public:
     void printTree(ostream & os) const override;
 
 private:
-    CPos _referencedPosition;
-    bool _rowAbsolute = false;
-    bool _columnAbsolute = false;
+    CPos _referencedPosition;      // Referenced position
+    bool _rowAbsolute = false;     // Flag indicating row absolute
+    bool _columnAbsolute = false;  // Flag indicating column absolute
 };
 //======================================================================================================================
 class RangeOperand : public Node
@@ -69,13 +69,12 @@ public:
     Node * cloneNode(int columnShift, int rowShift) const override;
     void printTree(ostream & os) const override;
 
-    CPos _upperLeft, _lowerRight;
+    CPos _upperLeft, _lowerRight;  // Upper-left and lower-right positions
 
 private:
-    bool _ulColumnAbs = false,
-         _ulRowAbs = false,
-         _lrColumnAbs = false,
-         _lrRowAbs = false;
-
+    bool _ulColumnAbs = false,     // Flag indicating upper-left column absolute
+         _ulRowAbs = false,        // Flag indicating upper-left row absolute
+         _lrColumnAbs = false,     // Flag indicating lower-right column absolute
+         _lrRowAbs = false;        // Flag indicating lower-right row absolute
 };
 //======================================================================================================================
